@@ -1,0 +1,121 @@
+---
+title: "quiz6"
+author: "YANING JIN"
+format: pdf
+editor: visual
+---
+
+```{r, include=FALSE}
+install.packages("reshape2")
+library("reshape2")
+install.packages("ggplot2")
+library("ggplot2")
+install.packages("car")
+library("car")
+install.packages("MASS")
+library("MASS") 
+install.packages("cat")
+library("cat")
+install.packages("testthat")
+library("testthat")
+```
+
+
+# Simulate
+
+```{r}
+set.seed(123) 
+hours <- 9:17
+
+employee_1 <- rnorm(length(hours), mean=8, sd=2) 
+
+employee_2 <- employee_1 + rnorm(length(hours), mean=0, sd=1)
+
+employee_1[1] <- 0
+employee_2[1] <- 0
+
+data <- data.frame(hour=hours, employee_1=round(employee_1), employee_2=round(employee_2))
+
+print(data)
+
+cor.test(data$employee_1, data$employee_2)
+
+t.test(data$employee_1, data$employee_2, paired = TRUE)
+
+normality_test_employee_1 <- shapiro.test(data$employee_1)
+normality_test_employee_2 <- shapiro.test(data$employee_2)
+print(normality_test_employee_1)
+print(normality_test_employee_2)
+
+
+morning_hours <- data$hour < 12
+afternoon_hours <- data$hour >= 12
+
+morning_hours <- data$hour < 12
+afternoon_hours <- data$hour >= 12
+
+t_test_morning_afternoon_employee_1 <- t.test(data$employee_1[morning_hours], data$employee_1[afternoon_hours])
+t_test_morning_afternoon_employee_2 <- t.test(data$employee_2[morning_hours], data$employee_2[afternoon_hours])
+print(t_test_morning_afternoon_employee_1)
+print(t_test_morning_afternoon_employee_2)
+
+outliers_employee_1 <- boxplot.stats(data$employee_1)$out
+outliers_employee_2 <- boxplot.stats(data$employee_2)$out
+print(outliers_employee_1)
+print(outliers_employee_2)
+
+lm_fit <- lm(employee_2 ~ employee_1, data = data)
+summary(lm_fit)
+
+
+
+```
+
+
+# Explore
+
+```{r}
+
+library(ggplot2)
+
+data$hour <- factor(data$hour)
+
+melted_data <- reshape2::melt(data, id.vars = 'hour', variable.name = 'employee')
+
+ggplot(melted_data, aes(x = hour, y = value, color = employee)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Customers Served Over Time",
+       x = "Hour",
+       y = "Number of Customers",
+       color = "Employee") +
+  theme_minimal()
+
+```
+
+# Testthat
+
+```{r}
+library("testthat")
+
+german_cities <- c("Berlin", "Hamburg", "Munich", "Cologne", "Frankfurt", "Rostock")
+
+library("testthat")
+test_that("german_cities contains exactly the specified cities", {
+  expected_cities <- c("Berlin", "Hamburg", "Munich", "Cologne", "Frankfurt", "Rostock")
+  expect_equal(sort(german_cities), sort(expected_cities))
+})
+
+test_that("german_cities contains exactly the specified cities", {
+  expected_cities <- c("Berlin", "Hamburg", "Munich", "Cologne", "Frankfurt", "Rostock")
+  expect_equal(sort(german_cities), sort(expected_cities))
+})
+test_that("german_cities contains no duplicate entries", {
+  expect_equal(length(german_cities), length(unique(german_cities)))
+})
+test_that("german_cities is a character vector", {
+  expect_true(is.character(german_cities))
+})
+
+```
+
